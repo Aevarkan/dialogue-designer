@@ -70,7 +70,9 @@ onNodeClick(({ event, node }) => {
 
         <!-- GRAPH VIEW -->
         <main id="flow-wrapper">
-            <VueFlow :nodes="nodes" :edges="edges" @node-click="handleNodeClick" />
+            <VueFlow :nodes="nodes" :edges="edges" @node-click="handleNodeClick">
+                <Background />
+            </VueFlow>
         </main>
 
         <!-- SCENE EDITOR SIDEBAR -->
@@ -92,6 +94,7 @@ onNodeClick(({ event, node }) => {
 import { defineComponent } from 'vue';
 import { useAppStateStore } from '../stores/appState';
 import SceneEditor from '../components/SceneEditor.vue';
+import { Background } from '@vue-flow/background';
 
 const EDITOR_PAGE_ID = "editor"
 
