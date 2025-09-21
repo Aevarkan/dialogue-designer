@@ -133,7 +133,6 @@ import ExportDialog from './components/ExportDialog.vue'
 import './scripts/keybindings'
 import { vDraggable  } from 'vue-draggable-plus'
 import { Scene } from './scripts/scene';
-import { Project } from './scripts/project'
 import { Plus, Copy, Trash, MessageSquare, Save, FolderOpen, FilePenLine, FilePlus, List, MessageSquareCode } from 'lucide-vue-next'
 import {nextTick, reactive} from 'vue'
 import { selectFileToImport, resetProject, OnImport } from './scripts/import'
@@ -141,8 +140,9 @@ import { exportDialogueFile } from './scripts/export'
 import { importLangFile, LangFile } from './scripts/lang_file';
 import { addKeybinding } from './scripts/keybindings'
 import { useSceneStore } from './stores/scenes'
+import { mapWritableState } from 'pinia'
+import { useAppStateStore } from './stores/appState'
 
-let reactive_project = reactive(Project);
 LangFile.all = reactive(LangFile.all);
 
 let simulate_close_timeout;
@@ -152,8 +152,21 @@ export default {
     	sceneStore() {
 			return useSceneStore()
 		},
+		...mapWritableState( useAppStateStore, {
+			project: "project",
+			page: "currentPage",
+			main_tab: "mainTab",
+			mobile_page: "mobilePage",
+			saved: "saved",
+			renaming_scene: "renamingScene",
+			simulate_closing: "simulateClosing",
+		}),
+		
 		scenes() {
 			return this.sceneStore.getAllScenes()
+		},
+		languages() {
+			return this.project.languages
 		}
 	},
 	components: {
@@ -165,17 +178,9 @@ export default {
 	data() {
 		return {
 			lang_files: LangFile.all,
-			project: reactive_project,
-			saved: false,
 			selected_scene: null,
 			last_scene: null,
-			renaming_scene: false,
-			simulate_closing: false,
-			page: 'start',
-			main_tab: 'scene',
-			languages: Project.languages,
 			selected_lang_file: null,
-			mobile_page: 'sidebar'
 		}
 	},
 	methods: {
