@@ -30,9 +30,9 @@ export class Scene {
 	on_open_commands: string
 	on_close_commands: string
 
-	constructor() {
+	constructor(sceneId: string = "scene") {
 		this.uuid = uuid();
-		this.id = 'scene';
+		this.id = sceneId;
 		this.npc_name = new TextField('NPC');
 		this.text = new TextField('Sample Text');
 
@@ -40,14 +40,6 @@ export class Scene {
 		];
 		this.on_open_commands = '';
 		this.on_close_commands = '';
-
-		let i = 2;
-		while (Scene.all.find(s => s.id == this.id) && i < 200) {
-			this.id = 'scene_'+i;
-			i++;
-		}
-
-		Scene.all.push(this);
 	}
 	addButton(): DialogueButton {
 		let new_button = new DialogueButton();
@@ -65,20 +57,27 @@ export class Scene {
 		}
 	}
 	select(): void {}
-	copy(scene: Scene): this {
-		this.id = scene.id;
-		this.makeNameUnique();
-		this.on_open_commands = scene.on_open_commands;
-		this.on_close_commands = scene.on_close_commands;
-		this.text.copy(scene.text);
-		this.npc_name.copy(scene.npc_name);
-		this.buttons.splice(0);
+
+	/**
+	 * Copies the input scene, returning an identical scene.
+	 * @param scene The scene to copy.
+	 * @returns A copy of the input scene.
+	 */
+	public static copy(scene: Scene): Scene {
+		const newScene = new Scene()
+		newScene.id = scene.id;
+		newScene.makeNameUnique();
+		newScene.on_open_commands = scene.on_open_commands;
+		newScene.on_close_commands = scene.on_close_commands;
+		newScene.text.copy(scene.text);
+		newScene.npc_name.copy(scene.npc_name);
+		newScene.buttons.splice(0);
 		for (let button of scene.buttons) {
-			let new_button = this.addButton();
+			let new_button = newScene.addButton();
 			new_button.copy(button);
 		}
 
-		return this;
+		return newScene;
 	}
 	makeNameUnique(): void {
 		let un_numbered_id = this.id.replace(/_\d+$/, '');

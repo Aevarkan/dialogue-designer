@@ -140,14 +140,22 @@ import { selectFileToImport, resetProject, OnImport } from './scripts/import'
 import { exportDialogueFile } from './scripts/export'
 import { importLangFile, LangFile } from './scripts/lang_file';
 import { addKeybinding } from './scripts/keybindings'
+import { useSceneStore } from './stores/scenes'
 
 let reactive_project = reactive(Project);
-Scene.all = reactive(Scene.all);
 LangFile.all = reactive(LangFile.all);
 
 let simulate_close_timeout;
 
 export default {
+	computed: {
+    	sceneStore() {
+			return useSceneStore()
+		},
+		scenes() {
+			return this.sceneStore.getAllScenes()
+		}
+	},
 	components: {
 		SceneEditor,
 		LocalizationEditor,
@@ -156,7 +164,6 @@ export default {
 	},
 	data() {
 		return {
-			scenes: Scene.all,
 			lang_files: LangFile.all,
 			project: reactive_project,
 			saved: false,
@@ -185,7 +192,7 @@ export default {
 		},
 		afterFileImported() {
 			this.page = 'editor';
-			if (Scene.all.find(scene => scene.hasTranslations())) {
+			if (this.scenes.find(scene => scene.hasTranslations())) {
 				this.$refs.autoload_lang_dialog.showModal();
 			}
 		},
@@ -214,7 +221,11 @@ export default {
 			this.$refs.export_dialog.open();
 		},
 		addScene() {
-			let scene = new Scene();
+			// Get a valid id then add the scene to the store
+			const sceneId = this.sceneStore.getUniqueId("scene")
+			let scene = new Scene(sceneId);
+			this.sceneStore.addScene(scene)
+
 			this.selectScene(scene);
 			nextTick(() => {
 				if (this.$refs.scene_editor) {
@@ -223,13 +234,16 @@ export default {
 			})
 		},
 		duplicateScene() {
-			let scene = new Scene().copy(this.selected_scene);
-			this.selectScene(scene);
+			const sceneId = this.sceneStore.getUniqueId(this.selected_scene.id);
+			const duplicateScene = Scene.copy(this.selected_scene);
+			duplicateScene.id = sceneId
+			this.selectScene(duplicateScene);
 		},
 		deleteScene() {
-			let index = Scene.all.indexOf(this.selected_scene);
-			Scene.all.splice(index, 1);
-			this.selectScene(Scene.all[Math.min(index, Scene.all.length-1)]);
+			const sceneToDelete = this.selected_scene
+			this.sceneStore.removeScene(sceneToDelete)
+			const newSelectedScene = this.sceneStore.getLastExistingScene(sceneToDelete)
+			this.selectScene(newSelectedScene)
 		},
 		selectScene(scene) {
 			this.last_scene = this.selected_scene;
@@ -239,7 +253,7 @@ export default {
 			this.mobile_page = 'editor';
 		},
 		reopenLastScene() {
-			if (this.last_scene && Scene.all.includes(this.last_scene)) {
+			if (this.last_scene && this.scenes.includes(this.last_scene)) {
 				this.selectScene(this.last_scene);
 			}
 		},
