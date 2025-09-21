@@ -80,7 +80,6 @@ onNodeClick(({ event, node }) => {
 				<button @click="reopenLastScene()">Reopen</button>
 			</div>
 			<SceneEditor v-else-if="selectedScene" ref="scene_editor" :scene="selectedScene" @simulate_closing="simulateClosing()"></SceneEditor>
-			<LocalizationEditor v-else-if="selected_lang_file" :language="selected_lang_file"></LocalizationEditor>
 			<div v-else id="closed_dialogue_screen">
 				<span>Create or select a scene from the sidebar</span>
 			</div>
@@ -93,7 +92,6 @@ onNodeClick(({ event, node }) => {
 import { defineComponent } from 'vue';
 import { useAppStateStore } from '../stores/appState';
 import SceneEditor from '../components/SceneEditor.vue';
-import LocalizationEditor from '../components/LocalizationEditor.vue';
 
 const EDITOR_PAGE_ID = "editor"
 
