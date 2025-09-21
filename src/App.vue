@@ -19,12 +19,21 @@ import ExportDialog from './components/ExportDialog.vue'
 			<a href="https://github.com/JannisX11/dialogue-designer/" target="_blank" rel="noopener">Open Source under GPL-3.0</a>
 		</p>
 	</div>
+	<!-- GRAPH VIEW -->
+	<div v-else-if="page == 'graph-view'" :mobile_page="mobile_page">
+		<GraphView />
+	</div>
+	<!-- NORMAL VIEW -->
 	<div id="wrapper" v-else-if="page == 'editor'" :mobile_page="mobile_page">
 		<header>
 			<h1>DialogueDesigner</h1>
 			<div class="tool" @click="importFile()">
 				<FolderOpen :size="22" />
 				Import
+			</div>
+			<div class="tool" @click="openGraphView()">
+				<GitFork :size="22"/>
+				Graph View
 			</div>
 			<div class="tool" @click="newFile()">
 				<FilePlus :size="22" />
@@ -133,13 +142,14 @@ import ExportDialog from './components/ExportDialog.vue'
 import './scripts/keybindings'
 import { vDraggable  } from 'vue-draggable-plus'
 import { Scene } from './scripts/scene';
-import { Plus, Copy, Trash, MessageSquare, Save, FolderOpen, FilePenLine, FilePlus, List, MessageSquareCode } from 'lucide-vue-next'
+import { Plus, Copy, Trash, MessageSquare, Save, FolderOpen, FilePenLine, FilePlus, List, MessageSquareCode, GitFork } from 'lucide-vue-next'
 import {nextTick, reactive} from 'vue'
 import { selectFileToImport, resetProject, OnImport } from './scripts/import'
 import { exportDialogueFile } from './scripts/export'
 import { importLangFile, LangFile } from './scripts/lang_file';
 import { addKeybinding } from './scripts/keybindings'
 import { useSceneStore } from './stores/scenes'
+import GraphView from './pages/GraphView.vue'
 import { mapWritableState } from 'pinia'
 import { useAppStateStore } from './stores/appState'
 import { useLanguageFileStore } from './stores/languageStore'
@@ -219,6 +229,9 @@ export default {
 			selectFileToImport().then(() => {
 				this.afterFileImported();
 			})
+		},
+		openGraphView() {
+			this.page = 'graph-view';
 		},
 		afterFileImported() {
 			this.page = 'editor';
