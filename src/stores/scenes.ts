@@ -1,10 +1,32 @@
 import { defineStore } from 'pinia';
-import { reactive, readonly } from 'vue';
+import { reactive, ref } from 'vue';
 import { Scene } from '../scripts/scene';
 
 export const useSceneStore = defineStore('scene', () => {
     const _scenes = reactive<Scene[]>([]);
-    // const _langFiles = reactive<LangFile[]>([]);
+    const _selectedScene = ref<Scene | null>(null);
+    const _lastSelectedScene = ref<Scene | null>(null);
+
+    function getLastSelectedScene() {
+        return _lastSelectedScene
+    }
+    function setLastSelectedScene(scene: Scene) {
+        _lastSelectedScene.value = scene
+    }
+    /**
+     * Selects a new scene, making the currently selected scene the last selected scene.
+     * @param scene The scene to select.
+     */
+    function selectScene(scene: Scene) {
+        _selectedScene.value = scene
+    }
+    /**
+     * Gets the currently selected scene.
+     * @returns Scene.
+     */
+    function getSelectedScene() {
+        return _selectedScene
+    }
 
     function getAllScenes() {
         return _scenes;
@@ -19,7 +41,7 @@ export const useSceneStore = defineStore('scene', () => {
         let uniqueId = checkId
         let i = 2
         while (_scenes.find(scene => scene.id == uniqueId) && i < 200) {
-			uniqueId = `${checkId}_${i}`;
+			uniqueId = `scene_${i}`;
 			i++;
 		}
         return uniqueId
@@ -31,10 +53,12 @@ export const useSceneStore = defineStore('scene', () => {
      */
     function getLastExistingScene(scene: Scene): Scene | null {
         const index = _scenes.indexOf(scene);
-        if (index === -1 || _scenes.length === 0) {
+        if (_scenes.length === 0) {
             return null
         }
-        return _scenes[Math.min(index, _scenes.length - 1)]
+        // Return the max, the index of the highest existing scene
+        // console.log(_scenes[Math.max(index, _scenes.length - 1)])
+        return _scenes[Math.max(index, _scenes.length - 1)]
     }
 
     function addScene(scene: Scene) {
@@ -46,5 +70,5 @@ export const useSceneStore = defineStore('scene', () => {
         if (index > -1) _scenes.splice(index, 1);
     }
 
-    return { getUniqueId, getAllScenes, getLastExistingScene, addScene, removeScene };
+    return { getUniqueId, getAllScenes, getLastExistingScene, addScene, removeScene, getLastSelectedScene, getSelectedScene, selectScene, setLastSelectedScene };
 });

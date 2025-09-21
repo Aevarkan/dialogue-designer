@@ -182,6 +182,24 @@ export default {
 				const store = useLanguageFileStore()
 				store.selectLanguageFile(languageFile)
 			}
+		},
+		selected_scene: {
+			get() {
+				const store = useSceneStore()
+				return store.getSelectedScene().value
+			},
+			set(scene) {
+				useSceneStore().selectScene(scene)
+			}
+		},
+		last_scene: {
+			get() {
+				const store = useSceneStore()
+				return store.getLastSelectedScene()
+			},
+			set(scene) {
+				useSceneStore().setLastSelectedScene(scene)
+			}
 		}
 	},
 	components: {
@@ -189,12 +207,6 @@ export default {
 		LocalizationEditor,
 		ExportDialog,
 		Plus, Copy, Trash, MessageSquare, Save, FolderOpen, FilePenLine, FilePlus, List, MessageSquareCode
-	},
-	data() {
-		return {
-			selected_scene: null,
-			last_scene: null,
-		}
 	},
 	methods: {
 		newFile() {
@@ -255,6 +267,7 @@ export default {
 			const sceneId = this.sceneStore.getUniqueId(this.selected_scene.id);
 			const duplicateScene = Scene.copy(this.selected_scene);
 			duplicateScene.id = sceneId
+			this.sceneStore.addScene(duplicateScene)
 			this.selectScene(duplicateScene);
 		},
 		deleteScene() {
