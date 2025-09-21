@@ -199,8 +199,22 @@ ul .tool {
     height: calc(100vh - 40px);
 	/* display: flex; */
 }
+
+/* THE EDITOR (RIGHT SIDE) */
+/* We change the spacing around a bit */
 #graph-wrapper > #gv-scene-editor {
     grid-area: editor;
+    display: grid;
+    grid-template-rows: 5fr 4fr;
+    grid-template-areas: 
+		"top"
+		"bottom";
+}
+:deep(#scene_editor) {
+    grid-area: top;
+}
+:deep(#properties) {
+    grid-area: bottom;
 }
 
 /* Styling for when the dialogue 'closes' during previews */
