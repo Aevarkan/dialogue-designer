@@ -3,6 +3,7 @@ import { Project } from "./project";
 import { IO, compileJSON } from "./util";
 import { TextField } from "./text_field";
 import { LangFile } from "./lang_file";
+import { useLanguageFileStore } from "../stores/languageStore";
 
 
 function processCommands(input: string) {
@@ -65,7 +66,8 @@ export function exportDialogueFile(): void {
 	})
 }
 export function exportLangFile(lang_id: string): void {
-	let language = LangFile.all.find(l => l.id == lang_id);
+	const languageFiles = useLanguageFileStore().getAllLanguageFiles()
+	let language = languageFiles.find(l => l.id == lang_id);
 	if (!language) return;
 	IO.export({
 		name: (Project.name||'unknown') + '.dialogue.json',

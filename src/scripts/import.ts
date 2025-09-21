@@ -1,3 +1,4 @@
+import { useLanguageFileStore } from "../stores/languageStore";
 import { LangFile, loadLangFile } from "./lang_file";
 import { Project } from "./project";
 import { DialogueButton, Scene } from "./scene";
@@ -74,8 +75,9 @@ export function resetProject() {
 	Project.prefix = '';
 	Project.customized_prefix = false;
 	Scene.all.splice(0);
-	LangFile.all.splice(0);
-	LangFile.selected = null;
+	const languageFileStore = useLanguageFileStore()
+	languageFileStore.getAllLanguageFiles().splice(0);
+	languageFileStore.selectLanguageFile(null);
 }
 
 

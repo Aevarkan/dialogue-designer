@@ -46,6 +46,7 @@ import { Scene } from '../scripts/scene';
 import { compileDialogueFile, exportDialogueFile } from '../scripts/export';
 import { LangFile } from '../scripts/lang_file';
 import { compileJSON } from '../scripts/util';
+import { useLanguageFileStore } from '../stores/languageStore';
 
 export default {
 	components: {
@@ -75,7 +76,7 @@ export default {
 			this.command = `/dialogue change @e[family=npc,r=8,c=1] ${first_scene_id}`;
 
 			this.lang_files.splice(0);
-			LangFile.all.forEach(lang => {
+			useLanguageFileStore().getAllLanguageFiles().forEach(lang => {
 				this.lang_files.push(lang.id);
 			})
 		},
@@ -103,7 +104,8 @@ export default {
 			navigator.clipboard.writeText(content);
 		},
 		copyLangFile(lang_id) {
-			let lang_file = LangFile.all.find(l => l.id == lang_id);
+			const languageFiles = useLanguageFileStore().getAllLanguageFiles()
+			let lang_file = languageFiles.find(l => l.id == lang_id);
 			if (lang_file) {
 				navigator.clipboard.writeText(lang_file.content);
 			}

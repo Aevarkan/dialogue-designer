@@ -142,8 +142,7 @@ import { addKeybinding } from './scripts/keybindings'
 import { useSceneStore } from './stores/scenes'
 import { mapWritableState } from 'pinia'
 import { useAppStateStore } from './stores/appState'
-
-LangFile.all = reactive(LangFile.all);
+import { useLanguageFileStore } from './stores/languageStore'
 
 let simulate_close_timeout;
 
@@ -151,6 +150,9 @@ export default {
 	computed: {
     	sceneStore() {
 			return useSceneStore()
+		},
+		languageFileStore() {
+			return useLanguageFileStore()
 		},
 		...mapWritableState( useAppStateStore, {
 			project: "project",
@@ -167,6 +169,19 @@ export default {
 		},
 		languages() {
 			return this.project.languages
+		},
+		lang_files() {
+			return this.languageFileStore.getAllLanguageFiles()
+		},
+		selected_lang_file: {
+			get() {
+				const store = useLanguageFileStore()
+				return store.getSelectedLanguageFile()
+			},
+			set(languageFile) {
+				const store = useLanguageFileStore()
+				store.selectLanguageFile(languageFile)
+			}
 		}
 	},
 	components: {
@@ -177,10 +192,8 @@ export default {
 	},
 	data() {
 		return {
-			lang_files: LangFile.all,
 			selected_scene: null,
 			last_scene: null,
-			selected_lang_file: null,
 		}
 	},
 	methods: {
@@ -272,8 +285,11 @@ export default {
 			}, 460);
 		},
 		addLanguage() {
-			let lf = new LangFile('en_US').setUniqueID();
-			this.openLangFile(lf);
+			const langFile = new LangFile('en_US');
+			const uniqueId = this.languageFileStore.getUniqueId(langFile)
+			langFile.id = uniqueId
+			this.languageFileStore.addLanguageFile(langFile)
+			this.openLangFile(langFile);
 		},
 		importLanguage() {
 			importLangFile().then(lang_file => {
@@ -282,18 +298,18 @@ export default {
 		},
 		duplicateLanguage() {
 			let source = this.selected_lang_file;
-			let lf = new LangFile(source.id, source.content).copy(source);
-			this.openLangFile(lf);
+			const newLangFile = LangFile.copy(source)
+			this.languageFileStore.addLanguageFile(newLangFile)
+			this.openLangFile(langFile);
 		},
 		deleteLanguage() {
 			let selected = this.selected_lang_file;
 			if (selected.content.length < 5 || confirm('Do you really want to delete this lang file')) {
-				LangFile.all.splice(LangFile.indexOf(selected), 1);
+				this.lang_files.splice(LangFile.indexOf(selected), 1);
 			}
 		},
 		selectLangFile(lf) {
 			this.selected_lang_file = lf;
-			LangFile.selected = lf;
 			let old_scene = this.selected_scene;
 			this.selected_scene = null;
 			nextTick(() => {
@@ -306,7 +322,6 @@ export default {
 		openLangFile(lf) {
 			this.selected_scene = null;
 			this.selected_lang_file = lf;
-			LangFile.selected = lf;
 			this.mobile_page = 'editor';
 		}
 	},

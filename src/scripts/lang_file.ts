@@ -1,3 +1,4 @@
+import { useLanguageFileStore } from "../stores/languageStore";
 import { IO, uuid } from "./util";
 import {EditorState} from "@codemirror/state"
 
@@ -18,7 +19,7 @@ const lang_names = [
 	{key: "ko_KR", label: 'Korean'},
 	{key: "ja_JP", label: 'Japanese'},
 	{key: "nl_NL", label: 'Dutch'},
-	{key: "bg_BG", label: ''},
+	{key: "bg_BG", label: 'Bulgarian'},
 	{key: "cs_CZ", label: 'Czech'},
 	{key: "da_DK", label: 'Danish'},
 	{key: "el_GR", label: 'Greek'},
@@ -45,30 +46,20 @@ export class LangFile {
 		this.uuid = uuid();
 		this.modified = true;
 		this.content = content;
-
-		LangFile.all.push(this);
 	}
 	getContent(): string {
 		return this.editor_state ? this.editor_state.doc.toString() : this.content;
 	}
-	setUniqueID(): this {
-		let needs_changing = !this.id || LangFile.all.find(lang_file => lang_file.id == this.id && lang_file.uuid != this.uuid);
-		if (!needs_changing) return this;
-
-		let i = 1;
-		let id = lang_names[0]?.key;
-		while (LangFile.all.find(lf => lf != this && lf.id == id) && i < 2000) {
-			id = lang_names[i]?.key || 'end';
-			i++;
-		}
-		this.id = id;
-		return this;
-	}
-	copy(source: LangFile): this {
-		this.id = source.id;
-		this.setUniqueID();
-		this.modified = true;
-		return this;
+	/**
+	 * Copies an existing language file.
+	 * @param source The language file to copy.
+	 * @returns A new language file with the same information.
+	 */
+	public static copy(source: LangFile): LangFile {
+		const uniqueId = useLanguageFileStore().getUniqueId(source);
+		const newFile = new LangFile(uniqueId, source.content)
+		newFile.modified = true;
+		return newFile;
 	}
 	getTranslation(input_key: string): string | null {
 		let lines = this.content.split(/\n[\s\n]*/);
@@ -81,13 +72,12 @@ export class LangFile {
 		}
 		return null;
 	}
-
-	static all: LangFile[] = [];
-	static selected: LangFile | null;
 }
 
 export function loadLangFile(file: {name: string, content: string}): LangFile {
-	let lang_file = new LangFile(file.name.split('.')[0], file.content).setUniqueID();
+	let lang_file = new LangFile(file.name.split('.')[0], file.content);
+	const uniqueId = useLanguageFileStore().getUniqueId(lang_file);
+	lang_file.id = uniqueId
 	lang_file.modified = false;
 	return lang_file;
 }

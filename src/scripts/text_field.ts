@@ -1,3 +1,4 @@
+import { useLanguageFileStore } from "../stores/languageStore";
 import { LangFile } from "./lang_file";
 import { compileJSON } from "./util"
 
@@ -5,11 +6,14 @@ type TextFieldMode = 'text' | 'translate' | 'translate_with_linebreaks' | 'json'
 
 function translate(key: string, injections?: string[]): string {
 	let result;
-	if (LangFile.selected) {
-		result = LangFile.selected.getTranslation(key);
+	const languageFileStore = useLanguageFileStore()
+	const languageFiles = languageFileStore.getAllLanguageFiles()
+	const selectedLanguageFile = languageFileStore.getSelectedLanguageFile()
+	if (selectedLanguageFile) {
+		result = selectedLanguageFile.getTranslation(key);
 	}
 	if (!result) {
-		for (let language of LangFile.all) {
+		for (let language of languageFiles) {
 			result = language.getTranslation(key);
 			if (result) break;
 		}
