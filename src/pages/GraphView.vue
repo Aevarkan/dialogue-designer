@@ -100,17 +100,43 @@ const EDITOR_PAGE_ID = "editor"
 export default defineComponent({
     name: "GraphView",
     computed: {
+        sceneStore() {
+            return useSceneStore()
+        },
         selectedScene() {
             return useSceneStore().getSelectedScene().value
         },
         stateStore() {
             return useAppStateStore()
+        },
+        simulate_closing() {
+            return this.stateStore.simulateClosing
         }
     },
     methods: {
         openEditorView() {
             this.stateStore.currentPage = EDITOR_PAGE_ID
-        }
+        },
+        simulateClosing() {
+			this.stateStore.simulateClosing = true
+            // Annoying conditional check that *really* makes sure the scene isn't null
+            const currentSceneRef = this.sceneStore.getSelectedScene()
+            if (currentSceneRef?.value) {
+                const currentScene = currentSceneRef.value
+                this.sceneStore.setLastSelectedScene(currentScene)
+            }
+			setTimeout(() => {
+				this.stateStore.simulateClosing = false;
+			}, 460);
+		},
+        // This is ONLY used for the scene editor preview
+        reopenLastScene() {
+            const lastSelectedScene = this.sceneStore.getLastSelectedScene()?.value
+			if (lastSelectedScene) {
+                this.stateStore.simulateClosing = false;
+				this.sceneStore.selectScene(lastSelectedScene);
+			}
+		},
     }
 })
 </script>
@@ -175,6 +201,18 @@ ul .tool {
 }
 #graph-wrapper > #gv-scene-editor {
     grid-area: editor;
+}
+
+/* Styling for when the dialogue 'closes' during previews */
+#closed_dialogue_screen {
+	text-align: center;
+	margin-top: calc(40vh - 50px);
+	color: var(--color-subtle);
+}
+#closed_dialogue_screen button {
+	display: block;
+	margin: auto;
+	margin-top: 12px;
 }
 </style>
 
