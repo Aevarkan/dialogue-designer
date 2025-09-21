@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import type { Node, Edge } from '@vue-flow/core'  
-import { VueFlow } from '@vue-flow/core';
-import { FilePlus, FolderOpen, MessageSquareText, Save } from 'lucide-vue-next';
+import { computed } from 'vue'
+import { useVueFlow, VueFlow } from '@vue-flow/core';
+import { MessageSquareText } from 'lucide-vue-next';
 import { useSceneStore } from '../stores/scenes';
 
 const sceneStore = useSceneStore();
 
 // these are our nodes
 const nodes = computed(() => 
-  sceneStore.getAllScenes().map((scene, index) => ({
-    id: scene.id,
-    type: 'default',
-    data: { label: scene.id },
-    position: { x: 100 * index, y: 100 * index },
-  }))
+    sceneStore.getAllScenes().map((scene, index) => ({
+        id: scene.uuid,
+        type: 'default',
+        data: { label: scene.id },
+        position: { x: 100 * index, y: 100 * index },
+    }))
 );
 
 // const edges = computed(() => {
@@ -33,6 +32,16 @@ const nodes = computed(() =>
 //   });
 //   return e;
 // });
+
+const { onNodeClick, onEdgeClick } = useVueFlow();
+
+// Node click event handler
+onNodeClick(({ event, node }) => {
+    const selectedScene = sceneStore.getScene(node.id)
+    if (selectedScene) {
+        sceneStore.selectScene(selectedScene)
+    }
+});
 
 </script>
 
@@ -61,7 +70,7 @@ const nodes = computed(() =>
 
         <!-- GRAPH VIEW -->
         <main id="flow-wrapper">
-            <VueFlow :nodes="nodes" :edges="edges" />
+            <VueFlow :nodes="nodes" :edges="edges" @node-click="handleNodeClick" />
         </main>
 
         <!-- SCENE EDITOR SIDEBAR -->

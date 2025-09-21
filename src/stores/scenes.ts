@@ -7,6 +7,16 @@ export const useSceneStore = defineStore('scene', () => {
     const _selectedScene = ref<Scene | null>(null);
     const _lastSelectedScene = ref<Scene | null>(null);
 
+    /**
+     * Gets a scene by its uuid.
+     * @param uuid The uuid of the scene.
+     * @returns The scene.
+     */
+    function getScene(uuid: string): Scene | null {
+        const scene = _scenes.find(scene => scene.uuid === uuid)
+        return scene || null
+    }
+
     function getLastSelectedScene() {
         return _lastSelectedScene
     }
@@ -70,5 +80,5 @@ export const useSceneStore = defineStore('scene', () => {
         if (index > -1) _scenes.splice(index, 1);
     }
 
-    return { getUniqueId, getAllScenes, getLastExistingScene, addScene, removeScene, getLastSelectedScene, getSelectedScene, selectScene, setLastSelectedScene };
+    return { getUniqueId, getAllScenes, getLastExistingScene, addScene, removeScene, getLastSelectedScene, getSelectedScene, selectScene, setLastSelectedScene, getScene };
 });
