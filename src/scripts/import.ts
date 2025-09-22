@@ -74,7 +74,7 @@ export function resetProject() {
 	Project.name = '';
 	Project.prefix = '';
 	Project.customized_prefix = false;
-	Scene.all.splice(0);
+	Scene.all().splice(0);
 	const languageFileStore = useLanguageFileStore()
 	languageFileStore.getAllLanguageFiles().splice(0);
 	languageFileStore.selectLanguageFile(null);
@@ -149,7 +149,7 @@ export function importDialogueFile(json: object, file_name: string): void {
 		let nav_command_index = commands.findIndex(command => command.startsWith('/dialogue open @s @initiator '));
 		if (nav_command_index != -1) {
 			let target_scene_id = commands[nav_command_index].replace('/dialogue open @s @initiator ', '');
-			let target_scene = Scene.all.find(s => s.getSceneTag() == target_scene_id);
+			let target_scene = Scene.all().find(s => s.getSceneTag() == target_scene_id);
 			if (target_scene) {
 				button.navigate_to = target_scene.uuid;
 				commands.splice(nav_command_index, 1);

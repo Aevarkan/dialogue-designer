@@ -202,7 +202,7 @@ export default {
 			let scenes = {
 				[this.scene.uuid]: 'Keep Open'
 			};
-			for (let scene of Scene.all) {
+			for (let scene of Scene.all()) {
 				if (scene != this.scene) {
 					scenes[scene.uuid] = scene.id;
 				}
@@ -222,8 +222,8 @@ export default {
 		clickButton(button) {
 			if (!this.preview_mode) return;
 			if (button.navigate_to) {
-				let scene = Scene.all.find(scene => scene.uuid == button.navigate_to);
-				if (!scene) scene = Scene.all[1];
+				let scene = Scene.all().find(scene => scene.uuid == button.navigate_to);
+				if (!scene) scene = Scene.all()[1];
 				if (scene) {
 					scene.select();
 				}

@@ -47,6 +47,7 @@ import { compileDialogueFile, exportDialogueFile } from '../scripts/export';
 import { LangFile } from '../scripts/lang_file';
 import { compileJSON } from '../scripts/util';
 import { useLanguageFileStore } from '../stores/languageStore';
+import { useSceneStore } from '../stores/scenes';
 
 export default {
 	components: {
@@ -68,11 +69,11 @@ export default {
 			this.$refs.dialog.showModal();
 			this.is_open = true;
 
-			this.has_scenes = Scene.all[0] ? true : false;
+			this.has_scenes = useSceneStore().getAllScenes()[0] ? true : false;
 			if (!this.has_scenes) return;
 
 			this.dialogue_file_name = (Project.name||'unknown') + '.dialogue.json';
-			let first_scene_id = Project.prefix + Scene.all[0].id;
+			let first_scene_id = Project.prefix + Scene.all()[0].id;
 			this.command = `/dialogue change @e[family=npc,r=8,c=1] ${first_scene_id}`;
 
 			this.lang_files.splice(0);

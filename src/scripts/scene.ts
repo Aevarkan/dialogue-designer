@@ -1,3 +1,4 @@
+import { useSceneStore } from "../stores/scenes";
 import { Project } from "./project";
 import { TextField } from "./text_field";
 import { uuid } from "./util";
@@ -51,9 +52,9 @@ export class Scene {
 		if (index >= 0) this.buttons.splice(index, 1);
 	}
 	remove(): void {
-		let index = Scene.all.indexOf(this);
+		let index = Scene.all().indexOf(this);
 		if (index != -1) {
-			Scene.all.splice(index, 1);
+			Scene.all().splice(index, 1);
 		}
 	}
 	select(): void {}
@@ -82,7 +83,7 @@ export class Scene {
 	makeNameUnique(): void {
 		let un_numbered_id = this.id.replace(/_\d+$/, '');
 		let i = 2;
-		while (Scene.all.find(s => (s.id == this.id && s.uuid != this.uuid)) && i < 200) {
+		while (Scene.all().find(s => (s.id == this.id && s.uuid != this.uuid)) && i < 200) {
 			this.id = un_numbered_id + '_' + i;
 			i++;
 		}
@@ -96,7 +97,13 @@ export class Scene {
 		if (this.buttons.find(b => b.text.hasTranslations())) return true;
 		return false;
 	}
-	static all: Scene[] = [];
+	
+	/**
+	 * Returns all scenes.
+	 */
+	public static all(): Scene[] {
+		return useSceneStore().getAllScenes()
+	}
 }
 // @ts-ignore
 window.Scene = Scene

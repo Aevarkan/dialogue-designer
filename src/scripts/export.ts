@@ -12,7 +12,7 @@ function processCommands(input: string) {
 	return list.length ? list : undefined;
 }
 
-export function compileDialogueFile(scenes: Scene[] = Scene.all): Object {
+export function compileDialogueFile(scenes: Scene[] = Scene.all()): Object {
 	let json_scenes: any[] = [];
 	let file = {
 		format_version: '1.14.0',
@@ -30,7 +30,7 @@ export function compileDialogueFile(scenes: Scene[] = Scene.all): Object {
 			scene_json.buttons = scene.buttons.map(button => {
 				let commands = processCommands(button.commands);
 				if (button.navigate_to) {
-					let target_scene = Scene.all.find(scene2 => scene2.uuid == button.navigate_to);
+					let target_scene = Scene.all().find(scene2 => scene2.uuid == button.navigate_to);
 					if (target_scene) {
 						let navigate_command = `/dialogue open @s @initiator ${Project.prefix + target_scene.id}`;
 						if (commands) {
