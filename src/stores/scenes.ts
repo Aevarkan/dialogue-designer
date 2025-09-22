@@ -25,6 +25,13 @@ export const useSceneStore = defineStore('scene', () => {
             parentScene.on_open_commands = command
         } else if (commandNodeId.startsWith(CLOSE_COMMAND_PREFIX)) {
             parentScene.on_close_commands = command
+        } else { // if it's neither, then it must be a button
+            const button = parentScene.buttons.find(button => button.uuid === commandNodeId)
+            if (!button) {
+                console.warn("couldn't find button")
+                return
+            }
+            button.commands = command
         }
     }
 
