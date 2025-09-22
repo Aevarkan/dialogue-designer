@@ -75,5 +75,7 @@ textarea {
     resize: both;
     overflow: auto;
     border-radius: 5px;
+    min-height: 3ch;
+    min-width: 15ch;
 }
 </style>
