@@ -152,6 +152,9 @@ export default {
 	},
 	data() {
 		return {
+			// doing some surgery
+			reactiveScene: reactive(this.scene),
+			// end surgery
 			oneDark,
 			codemirror_extensions_command: [
 				oneDark,
@@ -190,6 +193,40 @@ export default {
 			if (this.command_tab == 'button5' && !scene.buttons[4]) this.command_tab = 'on_open';
 			if (this.command_tab == 'button6' && !scene.buttons[5]) this.command_tab = 'on_open';
 			this.switchCommandTab(this.command_tab);
+		},
+
+		// more surgery
+		// we'll need to do even more surgery to make the dialogue update live, but I cannot be bothered
+		'reactiveScene': {
+			handler(newScene) {
+				switch (this.command_tab) {
+					case 'on_open':
+						this.command_value = newScene.on_open_commands;
+						break;
+					case 'on_close':
+						this.command_value = newScene.on_close_commands;
+						break;
+					case 'button1':
+						this.command_value = newScene.buttons[0]?.commands || '';
+						break;
+					case 'button2':
+						this.command_value = newScene.buttons[1]?.commands || '';
+						break;
+					case 'button3':
+						this.command_value = newScene.buttons[2]?.commands || '';
+						break;
+					case 'button4':
+						this.command_value = newScene.buttons[3]?.commands || '';
+						break;
+					case 'button5':
+						this.command_value = newScene.buttons[4]?.commands || '';
+						break;
+					case 'button6':
+						this.command_value = newScene.buttons[5]?.commands || '';
+						break;
+				}
+			},
+			deep: true
 		}
 	},
 	computed: {
