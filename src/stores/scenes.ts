@@ -2,10 +2,42 @@ import { defineStore } from 'pinia';
 import { reactive, ref } from 'vue';
 import { Scene } from '../scripts/scene';
 
+export const CLOSE_COMMAND_PREFIX = "closeCommand"
+export const OPEN_COMMAND_PREFIX = "openCommand"
+
 export const useSceneStore = defineStore('scene', () => {
     const _scenes = reactive<Scene[]>([]);
     const _selectedScene = ref<Scene | null>(null);
     const _lastSelectedScene = ref<Scene | null>(null);
+
+    /**
+     * Sets a command for a scene.
+     * @param sceneUuid The scene's uuid.
+     * @param commandNodeId The node id of the command.
+     * @param command The new command.
+     */
+    function setCommand(sceneUuid: string, commandNodeId: string, command: string) {
+        const parentScene = _scenes.find(s => s.uuid === sceneUuid)
+        if (!parentScene) return
+
+        // Check if this edit is a button or open/close command
+        if (commandNodeId.startsWith(OPEN_COMMAND_PREFIX)) {
+            parentScene.on_open_commands = command
+        } else if (commandNodeId.startsWith(CLOSE_COMMAND_PREFIX)) {
+            parentScene.on_close_commands = command
+        }
+    }
+
+    // function setCommand(sceneUuid: string, id: string, command: string) {
+    // const scene = _scenes.find(s => s.uuid === sceneUuid)
+    // if (!scene) return
+
+    // if (id.startsWith(OPEN_COMMAND_PREFIX)) {
+    //     scene.on_open_commands = command
+    // } else if (id.startsWith(CLOSE_COMMAND_PREFIX)) {
+    //     scene.on_close_commands = command
+    // }
+    // }
 
     /**
      * Gets a scene by its uuid.
@@ -80,5 +112,5 @@ export const useSceneStore = defineStore('scene', () => {
         if (index > -1) _scenes.splice(index, 1);
     }
 
-    return { getUniqueId, getAllScenes, getLastExistingScene, addScene, removeScene, getLastSelectedScene, getSelectedScene, selectScene, setLastSelectedScene, getScene };
+    return { getUniqueId, getAllScenes, getLastExistingScene, addScene, removeScene, getLastSelectedScene, getSelectedScene, selectScene, setLastSelectedScene, getScene, setCommand };
 });

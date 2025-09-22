@@ -2,13 +2,15 @@
 import { computed, onMounted } from 'vue'
 import { useVueFlow, VueFlow } from '@vue-flow/core';
 import { MessageSquareText } from 'lucide-vue-next';
-import { useSceneStore } from '../stores/scenes';
+import { CLOSE_COMMAND_PREFIX, OPEN_COMMAND_PREFIX, useSceneStore } from '../stores/scenes';
+import CommandNode, { EditEvent } from '../components/vueFlow/CommandNode.vue';
 
 const sceneStore = useSceneStore();
 const graphStore = useGraphStore();
 
-// these are our nodes`
+// Node stuff is here, then edges are below them
 const nodes = computed(() => {
+    // SCENE NODES
     const sceneNodes = sceneStore.getAllScenes().map((scene, index) => ({
         id: scene.uuid,
         type: 'default',
@@ -20,10 +22,12 @@ const nodes = computed(() => {
         position: graphStore.getNodePosition(scene.uuid)
     }))
 
+    // COMMAND NODES
+    // Their labels are the commands themselves
     const buttonNodes = sceneStore.getAllScenes().flatMap(scene =>
         scene.buttons.map(button => ({
             id: button.uuid,
-            type: 'buttonNode',
+            type: 'command',
             data: {
                 label: button.commands,
                 parentSceneUuid: scene.uuid
@@ -34,22 +38,22 @@ const nodes = computed(() => {
 
     const sceneOpenCloseCommands = sceneStore.getAllScenes().flatMap(scene => [
         {
-            id: `${scene.uuid}-closeCommand`,
-            type: 'buttonNode',
+            id: `${CLOSE_COMMAND_PREFIX}-${scene.uuid}`,
+            type: 'command',
             data: {
                 label: scene.on_close_commands,
                 parentSceneUuid: scene.uuid
             },
-            position: graphStore.getNodePosition(`${scene.uuid}-closeCommand`)
+            position: graphStore.getNodePosition(`${CLOSE_COMMAND_PREFIX}-${scene.uuid}`)
         },
         {
-            id: `${scene.uuid}-openCommand`,
-            type: 'buttonNode',
+            id: `${OPEN_COMMAND_PREFIX}-${scene.uuid}`,
+            type: 'command',
             data: {
                 label: scene.on_open_commands,
                 parentSceneUuid: scene.uuid
             },
-            position: graphStore.getNodePosition(`${scene.uuid}-openCommand`)
+            position: graphStore.getNodePosition(`${OPEN_COMMAND_PREFIX}-${scene.uuid}`)
         }
     ])
 
@@ -73,6 +77,7 @@ const nodes = computed(() => {
 //   return e;
 // });
 
+// EVENT HANDLING, INCLUDING NODE STUFF
 const { onNodeClick, onEdgeClick, onNodeDragStop, onViewportChangeEnd, setViewport } = useVueFlow();
 
 // Node click event handler
@@ -83,6 +88,14 @@ onNodeClick(({ event, node }) => {
         console.log("Selected", selectedScene)
     }
 });
+
+// Handle when the command node text is edited
+// This'll store that edit in the global store
+function handleEdit(payload: EditEvent) {
+    const { command, id, parentSceneUuid } = payload
+
+    sceneStore.setCommand(parentSceneUuid, id, command)
+}
 
 // Store locations in pinia
 // Node locations
@@ -133,6 +146,11 @@ onMounted(() => {
                 :elements-selectable="false"
                 @node-click="handleNodeClick"
             >
+                <!-- we define the command node type here -->
+                <template #node-command="props">
+                    <CommandNode v-bind="props" @edit="handleEdit" />
+                </template>
+
                 <Background />
             </VueFlow>
         </main>
@@ -306,4 +324,10 @@ ul .tool {
     background:#56916c;
     /* box-shadow:0 0 0 2px #2563eb; */
 }
+
+.vue-flow__node:active {
+    background:#2980b9;
+    /* box-shadow:0 0 0 2px #2563eb; */
+}
+
 </style>
