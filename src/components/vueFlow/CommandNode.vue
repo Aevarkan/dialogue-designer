@@ -71,6 +71,7 @@ function handleInput() {
 }
 
 textarea {
+    color: black;
     resize: both;
     overflow: auto;
     border-radius: 5px;
