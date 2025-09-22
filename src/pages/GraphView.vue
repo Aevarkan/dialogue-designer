@@ -8,8 +8,8 @@ const sceneStore = useSceneStore();
 const graphStore = useGraphStore();
 
 // these are our nodes`
-const nodes = computed(() => 
-    sceneStore.getAllScenes().map((scene, index) => ({
+const nodes = computed(() => {
+    const sceneNodes = sceneStore.getAllScenes().map((scene, index) => ({
         id: scene.uuid,
         type: 'default',
         data: {
@@ -19,7 +19,42 @@ const nodes = computed(() =>
         // position: { x: 100 * index, y: 100 * index },
         position: graphStore.getNodePosition(scene.uuid)
     }))
-);
+
+    const buttonNodes = sceneStore.getAllScenes().flatMap(scene =>
+        scene.buttons.map(button => ({
+            id: button.uuid,
+            type: 'buttonNode',
+            data: {
+                label: button.commands,
+                parentSceneUuid: scene.uuid
+            },
+            position: graphStore.getNodePosition(button.uuid)
+        }))
+    )
+
+    const sceneOpenCloseCommands = sceneStore.getAllScenes().flatMap(scene => [
+        {
+            id: `${scene.uuid}-closeCommand`,
+            type: 'buttonNode',
+            data: {
+                label: scene.on_close_commands,
+                parentSceneUuid: scene.uuid
+            },
+            position: graphStore.getNodePosition(`${scene.uuid}-closeCommand`)
+        },
+        {
+            id: `${scene.uuid}-openCommand`,
+            type: 'buttonNode',
+            data: {
+                label: scene.on_open_commands,
+                parentSceneUuid: scene.uuid
+            },
+            position: graphStore.getNodePosition(`${scene.uuid}-openCommand`)
+        }
+    ])
+
+    return [...sceneNodes, ...buttonNodes, ...sceneOpenCloseCommands]
+});
 
 // const edges = computed(() => {
 //   const edgeArray = [];
