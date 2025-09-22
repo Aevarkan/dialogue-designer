@@ -1,18 +1,23 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useVueFlow, VueFlow } from '@vue-flow/core';
 import { MessageSquareText } from 'lucide-vue-next';
 import { useSceneStore } from '../stores/scenes';
 
 const sceneStore = useSceneStore();
+const graphStore = useGraphStore();
 
-// these are our nodes
+// these are our nodes`
 const nodes = computed(() => 
     sceneStore.getAllScenes().map((scene, index) => ({
         id: scene.uuid,
         type: 'default',
-        data: { label: scene.id },
-        position: { x: 100 * index, y: 100 * index },
+        data: {
+            label: scene.id,
+        },
+        class: sceneStore.getSelectedScene().value?.uuid === scene.uuid ? 'selected' : '',
+        // position: { x: 100 * index, y: 100 * index },
+        position: graphStore.getNodePosition(scene.uuid)
     }))
 );
 
@@ -33,15 +38,32 @@ const nodes = computed(() =>
 //   return e;
 // });
 
-const { onNodeClick, onEdgeClick } = useVueFlow();
+const { onNodeClick, onEdgeClick, onNodeDragStop, onViewportChangeEnd, setViewport } = useVueFlow();
 
 // Node click event handler
 onNodeClick(({ event, node }) => {
     const selectedScene = sceneStore.getScene(node.id)
     if (selectedScene) {
         sceneStore.selectScene(selectedScene)
+        console.log("Selected", selectedScene)
     }
 });
+
+// Store locations in pinia
+// Node locations
+onNodeDragStop(({node}) => {
+    const id = node.id
+    const position = node.position
+    graphStore.setNodePosition(id, position)
+})
+// Viewport (the graph view itself)
+onViewportChangeEnd((newPosition) => {
+    graphStore.setViewPosition(newPosition)
+})
+// Get the old position
+onMounted(() => {
+    setViewport(graphStore.getViewPosition().value)
+})
 
 </script>
 
@@ -70,7 +92,12 @@ onNodeClick(({ event, node }) => {
 
         <!-- GRAPH VIEW -->
         <main id="flow-wrapper">
-            <VueFlow :nodes="nodes" :edges="edges" @node-click="handleNodeClick">
+            <VueFlow
+                :nodes="nodes"
+                :edges="edges"
+                :elements-selectable="false"
+                @node-click="handleNodeClick"
+            >
                 <Background />
             </VueFlow>
         </main>
@@ -95,6 +122,7 @@ import { defineComponent } from 'vue';
 import { useAppStateStore } from '../stores/appState';
 import SceneEditor from '../components/SceneEditor.vue';
 import { Background } from '@vue-flow/background';
+import { useGraphStore } from '../stores/graphStore';
 
 const EDITOR_PAGE_ID = "editor"
 
@@ -231,6 +259,7 @@ ul .tool {
 }
 </style>
 
+<!-- Vueflow styles need to be global, I don't think there'll be more than one graph view -->
 <style>
 /* import the necessary styles for Vue Flow to work */
 @import '@vue-flow/core/dist/style.css';
@@ -238,4 +267,8 @@ ul .tool {
 /* import the default theme, this is optional but generally recommended */
 @import '@vue-flow/core/dist/theme-default.css';
 
+.vue-flow__node.selected {
+    background:#56916c;
+    /* box-shadow:0 0 0 2px #2563eb; */
+}
 </style>
