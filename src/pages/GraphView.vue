@@ -4,6 +4,7 @@ import { useVueFlow, VueFlow } from '@vue-flow/core';
 import { MessageSquareText } from 'lucide-vue-next';
 import { CLOSE_COMMAND_PREFIX, OPEN_COMMAND_PREFIX, useSceneStore } from '../stores/scenes';
 import CommandNode, { EditEvent } from '../components/vueFlow/CommandNode.vue';
+import SceneNode from '../components/vueFlow/SceneNode.vue';
 
 const sceneStore = useSceneStore();
 const graphStore = useGraphStore();
@@ -13,7 +14,7 @@ const nodes = computed(() => {
     // SCENE NODES
     const sceneNodes = sceneStore.getAllScenes().map((scene, index) => ({
         id: scene.uuid,
-        type: 'default',
+        type: 'scene',
         data: {
             label: scene.id,
         },
@@ -88,6 +89,12 @@ onNodeClick(({ event, node }) => {
         console.log("Selected", selectedScene)
     }
 });
+// have to check if a node is selected separately now
+const isSceneSelected = (id: string) => {
+    const selected = sceneStore.getSelectedScene()
+    return selected?.value?.uuid === id
+}
+
 
 // Handle when the command node text is edited
 // This'll store that edit in the global store
@@ -144,11 +151,18 @@ onMounted(() => {
                 :nodes="nodes"
                 :edges="edges"
                 :elements-selectable="false"
-                @node-click="handleNodeClick"
             >
                 <!-- we define the command node type here -->
                 <template #node-command="props">
                     <CommandNode v-bind="props" @edit="handleEdit" />
+                </template>
+
+                <!-- and now the scene node -->
+                <template #node-scene="props">
+                    <SceneNode
+                        v-bind="props"
+                        :selected="isSceneSelected(props.id)"
+                    />
                 </template>
 
                 <Background />
