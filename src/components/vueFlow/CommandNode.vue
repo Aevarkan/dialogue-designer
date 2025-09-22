@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { NodeProps } from '@vue-flow/core'
-import { useTextareaAutosize } from '@vueuse/core';
 import { ref, watch } from 'vue';
 
 const props = defineProps<NodeProps<{
@@ -27,7 +26,6 @@ const input = ref(props.data.label)
 // Since it keeps its own copy, we make sure external updates sync to it
 watch(() => props.data.label, (newVal) => input.value = newVal)
 
-const { textarea } = useTextareaAutosize({ input })
 function handleInput() {
     emit('edit', {
         id: props.id,
@@ -42,10 +40,8 @@ function handleInput() {
 <template>
     <div class="command-node-container">
         <p>Command</p>
-        <div class="command-node-text nodrag">
+        <div class="command-node-text nodrag nowheel">
             <textarea
-                ref="textarea"
-                class="resize-none"
                 type="text"
                 v-model="input"
                 @input="handleInput"
@@ -73,14 +69,10 @@ function handleInput() {
 .command-node-text {
     padding: 8px;
 }
-/* Vueuse recommended this */
-textarea {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    border-radius: 5px;
-}
 
-textarea::-webkit-scrollbar {
-  display: none;
+textarea {
+    resize: both;
+    overflow: auto;
+    border-radius: 5px;
 }
 </style>
