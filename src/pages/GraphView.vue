@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useVueFlow, VueFlow } from '@vue-flow/core';
+import { Edge, useVueFlow, VueFlow } from '@vue-flow/core';
 import { MessageSquareText } from 'lucide-vue-next';
 import { CLOSE_COMMAND_PREFIX, OPEN_COMMAND_PREFIX, useSceneStore } from '../stores/scenes';
 import CommandNode, { EditEvent } from '../components/vueFlow/CommandNode.vue';
@@ -61,22 +61,40 @@ const nodes = computed(() => {
     return [...sceneNodes, ...buttonNodes, ...sceneOpenCloseCommands]
 });
 
-// const edges = computed(() => {
-//   const edgeArray = [];
-//   sceneStore.getAllScenes().forEach((scene) => {
-//     scene.commands.forEach((cmd, i) => {
-//       if (cmd.navigationTargetId) {
-//         edgeArray.push({
-//           id: `e-${scene.id}-cmd-${i}-${cmd.navigationTargetId}`,
-//           source: `${scene.id}-cmd-${i}`,
-//           target: cmd.navigationTargetId,
-//           type: 'smoothstep',
-//         });
-//       }
-//     });
-//   });
-//   return e;
-// });
+const edges = computed(() => {
+    const edgeArray: Edge[] = []
+    sceneStore.getAllScenes().forEach(scene => {
+        // Open/close commands are always there
+        // I'm sure there's a cleaner way of doing this but I'm too tired
+        edgeArray.push({ // onOpen command
+            id: `e-onOpen-${scene.uuid}`,
+            // onOpen has source and target flipped
+            target: scene.uuid,
+            source: `${OPEN_COMMAND_PREFIX}-${scene.uuid}`,
+            animated: true
+            // type: 'smoothstep'
+        })
+        edgeArray.push({ // onClose command
+            id: `e-onClose-${scene.uuid}`,
+            source: scene.uuid,
+            target: `${CLOSE_COMMAND_PREFIX}-${scene.uuid}`,
+            animated: true
+            // type: 'smoothstep'
+        })
+
+        // and now the buttons
+        // navigation buttons are going to be a PAIN
+        scene.buttons.forEach(button => {
+            edgeArray.push({
+                id: `e-${scene.uuid}-${button.uuid}`,
+                source: scene.uuid,
+                target: button.uuid
+            })
+        })
+        // TODO: Conditional button rendering IF it's a navigation button
+    })
+    return [...edgeArray]
+})
 
 // EVENT HANDLING, INCLUDING NODE STUFF
 const { onNodeClick, onEdgeClick, onNodeDragStop, onViewportChangeEnd, setViewport } = useVueFlow();
