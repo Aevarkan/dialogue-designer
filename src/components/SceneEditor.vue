@@ -419,14 +419,6 @@ export default {
 }
 
 #dialogue {
-	--color-mcui-bg: #c6c6c6;
-	--color-mcui-highlight: #ffffff;
-	--color-mcui-shadow: #555555;
-	--color-mcui-content-shadow: #3c3c3c;
-	--color-mcui-text: #000;
-	--color-mcui-text-button: #4c4c4c;
-	--mcui-text-size: 20px;
-
 	max-width: 800px;
 	min-height: 350px;
 	color: var(--color-mcui-text);
